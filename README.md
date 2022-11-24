@@ -3,7 +3,7 @@
 ## Project Motivation
 Pipeline classifier of messages
 
-### Instructions:
+## Instructions:
 1. Run the following commands
 
     - To run ETL pipeline
