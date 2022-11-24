@@ -35,6 +35,11 @@ from sklearn.metrics import f1_score
 import pickle
 
 def load_data(database_filepath):
+    '''
+    Function: Load data from the database_filepath
+    Input: database_filepath (string)
+    Return: X (np.array), Y(np.array) and category_names(list)
+    '''
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('categories', con = engine)
     X = np.array(df['message'])
@@ -57,6 +62,12 @@ def load_data(database_filepath):
     return X, Y, category_names
     
 def tokenize(text):
+    '''
+    Function: Tokenize the text - 1. Remove strings that are not numbers or letters
+    2. Separation into words 4. Remove Stop words 3. Lemmatizer 
+    Input: text (string)
+    Return: clean_tokens (list of tokens)
+    '''
     text = text.lower()
     #extract all the character strings that are not numbers or letters
     text = re.sub(pattern = '[^a-zA-Z0-9]', repl = " ", string = text)
@@ -70,6 +81,14 @@ def tokenize(text):
 
 
 def build_model():
+    '''
+    Create a pipeline with the following Transformers 1. CountVectorizer 2.TfidTransformer 3.MultiOutputClassifier
+    using a RandomForestClassifier
+    A Grid Search was buld up for optimization having as parameter 'clf__estimator__min_samples_split'
+   
+    Return: Optimal model
+    
+    '''
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer = tokenize)),
         ('tfdi', TfidfTransformer()),
@@ -87,6 +106,14 @@ def build_model():
     return model
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''
+    Evaluates the model predictions with the precision score, recall score and f1 score
+    Input: 
+        - model (output of build_model)
+        - X_test (np.array, output after data split for trainning and testing)
+        - Y_test (np.array, output after data split for trainning and testing)
+        - category_names (list of the category names, output of load_data())
+    '''
     Y_pred = model.predict(X_test)
     for i in range(0, Y_test.shape[1]):
         print(category_names[i], "\n",
@@ -97,10 +124,18 @@ def evaluate_model(model, X_test, Y_test, category_names):
              )
     
 def save_model(model, model_filepath):
+    '''
+    Save model as pickle
+    Input: model (output of build_model())
+    Output: pickle file saved in the model_filepath
+    '''
     pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
+    '''
+    Run the load, build_model, evaluate_model and save_model functions
+    '''
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
